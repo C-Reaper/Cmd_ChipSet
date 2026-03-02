@@ -1,27 +1,27 @@
 #include "/home/codeleaded/System/Static/Library/ChipSet.h"
-#include "/home/codeleaded/System/Static/Library/DD7Segment.h"
-#include "/home/codeleaded/System/Static/Library/WindowEngine1.0.h"
 
-ChipSet cs;
-DD7Segment s7;
-
-void ChipSet_Std_Seg7(Chip_Signal* input,Chip_Signal* output){
-    //*output = input[0] ^ input[1];
-    Chip_Def* cd = ChipSet_Find(&cs,"SEG7");
-    if(cd){
-        Clear(LIGHT_BLUE);
-
-        const int n0 = input[0] % 10;
-        const int n1 = input[0] % 100;
-        const int n2 = input[0] % 1000;
-        Sprite_RenderAlpha(window.Buffer,window.Width,window.Height,s7.digits + n2,0.0f,0.0f);
-        Sprite_RenderAlpha(window.Buffer,window.Width,window.Height,s7.digits + n1,s7.digits->w + 20.0f,0.0f);
-        Sprite_RenderAlpha(window.Buffer,window.Width,window.Height,s7.digits + n0,2 * (s7.digits->w + 20.0f),0.0f);
-    }
-}
-Chip_Def Chip_New_Custom_MAIN(ChipSet* cs){
+Chip_Def Chip_New_Custom_OR(ChipSet* cs){
     Chip_Def cd = Chip_Def_New(
-        "MAIN",
+        "COR",
+        Chip_SignalSize_Map_Make((Chip_SignalSize[]){ CHIP_SIGNALSIZE_64,CHIP_SIGNALSIZE_64,CHIP_SIGNALSIZE_NONE }),
+        Chip_SignalSize_Map_Make((Chip_SignalSize[]){ CHIP_SIGNALSIZE_64,CHIP_SIGNALSIZE_NONE })
+    );
+    Vector_Push(&cd.chips,(Chip_Impl[]){ ChipSet_New_Impl(cs,"NOT") });
+    Vector_Push(&cd.chips,(Chip_Impl[]){ ChipSet_New_Impl(cs,"NOT") });
+    Vector_Push(&cd.chips,(Chip_Impl[]){ ChipSet_New_Impl(cs,"AND") });
+    Vector_Push(&cd.chips,(Chip_Impl[]){ ChipSet_New_Impl(cs,"NOT") });
+
+    Vector_Push(&cd.wires,(Chip_Wire[]){{ .src = 0U, .dst = 3U  }});
+    Vector_Push(&cd.wires,(Chip_Wire[]){{ .src = 4U, .dst = 7U  }});
+    Vector_Push(&cd.wires,(Chip_Wire[]){{ .src = 1U, .dst = 5U  }});
+    Vector_Push(&cd.wires,(Chip_Wire[]){{ .src = 6U, .dst = 8U  }});
+    Vector_Push(&cd.wires,(Chip_Wire[]){{ .src = 9U, .dst = 10U }});
+    Vector_Push(&cd.wires,(Chip_Wire[]){{ .src = 11U,.dst = 2U  }});
+    return cd;
+}
+Chip_Def Chip_New_Custom_HADD(ChipSet* cs){
+    Chip_Def cd = Chip_Def_New(
+        "CHADD",
         Chip_SignalSize_Map_Make((Chip_SignalSize[]){ CHIP_SIGNALSIZE_64,CHIP_SIGNALSIZE_64,CHIP_SIGNALSIZE_NONE }),
         Chip_SignalSize_Map_Make((Chip_SignalSize[]){ CHIP_SIGNALSIZE_64,CHIP_SIGNALSIZE_64,CHIP_SIGNALSIZE_NONE })
     );
@@ -37,38 +37,58 @@ Chip_Def Chip_New_Custom_MAIN(ChipSet* cs){
     return cd;
 }
 
-void Setup(AlxWindow* w){
-    s7 = DD7Segment_New("./assets",200,400);
-    cs = ChipSet_New();
+void ChipSet_Test(ChipSet* cs,CStr name){
+    printf("------ %s ------\n",name);
+    for(int i = 0;i<2;i++){
+        for(int j = 0;j<2;j++){
+            Chip_Signal ins[] = { j,i };
+            Chip_Signal outs[] = { 0x0ULL,0x0ULL };
 
-    ChipSet_AddDLL(&cs,"./bin/std");
-    ChipSet_AddChip(&cs,Chip_Def_New_Fn("SEG7", Chip_SignalSize_Map_Make((Chip_SignalSize[]){ CHIP_SIGNALSIZE_64,CHIP_SIGNALSIZE_NONE }),Chip_SignalSize_Map_Make((Chip_SignalSize[]){ CHIP_SIGNALSIZE_NONE }),ChipSet_Std_Seg7));
-    
-    //ChipSet_AddChip(&cs,Chip_New_Custom_MAIN(&cs));
-    //ChipSet_Print(&cs);
+            ChipSet_Exe(
+                cs,
+                name,
+                ins,
+                outs
+            );
 
-    Clear(LIGHT_BLUE);
-}
-void Update(AlxWindow* w){
-    if(Stroke(ALX_KEY_W).PRESSED){
-        Chip_Signal ins[] = { (int)GetMouse().x };
-        Chip_Signal outs[] = { 0x0ULL };
-        
-        ChipSet_Exe(
-            &cs,
-            "SEG7",
-            ins,
-            outs
-        );
+            printf("    CS: ");
+
+            Chip_Def* cd = ChipSet_Find(cs,name);
+            for(int k = 0;k<cd->inputs.size;k++){
+                printf("%llx",ins[k]);
+                if(k<cd->inputs.size - 1)
+                    printf(",");
+            }
+            
+            printf(" = ");
+
+            for(int k = 0;k<cd->outputs.size;k++){
+                printf("%llx",outs[k]);
+                if(k<cd->outputs.size - 1)
+                    printf(",");
+            }
+
+            printf("\n");
+        }
     }
-}
-void Delete(AlxWindow* w){
-    ChipSet_Free(&cs);
-	DD7Segment_Free(&s7);
 }
 
 int main(){
-    if(Create("ChipSet - 7Seg",1900,1000,1,1,Setup,Update,Delete))
-        Start();
+    ChipSet cs = ChipSet_New();
+    ChipSet_AddDLL(&cs,"./bin/std");
+    
+    ChipSet_AddChip(&cs,Chip_New_Custom_OR(&cs));
+    ChipSet_AddChip(&cs,Chip_New_Custom_HADD(&cs));
+
+    ChipSet_Test(&cs,"AND");
+    ChipSet_Test(&cs,"NAND");
+    ChipSet_Test(&cs,"OR");
+    ChipSet_Test(&cs,"XOR");
+
+    ChipSet_Test(&cs,"COR");
+    ChipSet_Test(&cs,"CHADD");
+
+    ChipSet_Print(&cs);
+    ChipSet_Free(&cs);
     return 0;
 }
