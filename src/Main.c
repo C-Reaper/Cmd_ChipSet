@@ -2,9 +2,21 @@
 
 int main(){
     ChipBench cb = ChipBench_New("./assets/digits");
+
     ChipBench_Load(&cb,"./bin/std");
     ChipBench_Load(&cb,"./bin/seg7");
-    ChipBench_AddGUI(&cb,"SEG7",0U,0U,(Chip_Signal[]){ 0U });
+
+
+    Chip_Def cd = Chip_Def_New(
+        "MAIN",
+        Chip_SignalSize_Map_Make((Chip_SignalSize[]){ CHIP_SIGNALSIZE_64,CHIP_SIGNALSIZE_NONE }),
+        Chip_SignalSize_Map_Make((Chip_SignalSize[]){ CHIP_SIGNALSIZE_NONE })
+    );
+    Vector_Push(&cd.chips,(Chip_Impl[]){ ChipSet_New_Impl(&cb.cs,"SEG7") });
+    Vector_Push(&cd.wires,(Chip_Wire[]){{ .src = 0U, .dst = 1U  }});
+    ChipSet_AddChip(&cb.cs,cd);
+    ChipBench_AddGUI(&cb,"SEG7",0U,0U,(Chip_Impl*[]){ (Chip_Impl*)Vector_Get(&cd.chips,0) });
+
 
     ChipBench_Print(&cb);
     ChipBench_Start(&cb);
@@ -16,13 +28,14 @@ int main(){
             
             ChipSet_Exe(
                 &cb.cs,
-                "SEG7",
+                "MAIN",
                 ins,
                 outs
             );
         }
 
-        Thread_Sleep_M(1000);
+        if(!cb.w.Focus) Thread_Sleep_M(40);
+        else            Thread_Sleep_M(2);
     }
 
     ChipBench_Free(&cb);

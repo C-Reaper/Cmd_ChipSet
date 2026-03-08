@@ -4,14 +4,16 @@ void ChipBench_Seg7_Std(ChipBench* cb,Chip_Def* cd,Chip_Signal* input,Chip_Signa
     //ChipGUI_Impl* cgi = NULL;
     //Chip_Signal* cs = (Chip_Signal*)cgi->data;
     //(*cs)++;
+
+    //printf("SEG7: SET\n");
 }
 
 void ChipBench_Seg7_Render(ChipBench* cb,ChipGUI_Impl* cgi){
-    Chip_Signal cs = *(Chip_Signal*)cgi->data;
+    Chip_Impl* ci = *(Chip_Impl**)cgi->data;
 
-    const int n0 = (cs / 1)   % 10;
-    const int n1 = (cs / 10)  % 10;
-    const int n2 = (cs / 100) % 10;
+    const int n0 = (*(Chip_Signal*)Vector_Get(&ci->inputs,0) / 1)   % 10;
+    const int n1 = (*(Chip_Signal*)Vector_Get(&ci->inputs,0) / 10)  % 10;
+    const int n2 = (*(Chip_Signal*)Vector_Get(&ci->inputs,0) / 100) % 10;
     
     //Sprite_RenderAlpha(cb->w.Buffer,cb->w.Width,cb->w.Height,s7.digits + n2,0.0f,0.0f);
     //Sprite_RenderAlpha(cb->w.Buffer,cb->w.Width,cb->w.Height,s7.digits + n1,s7.digits->w + 20.0f,0.0f);
@@ -19,11 +21,15 @@ void ChipBench_Seg7_Render(ChipBench* cb,ChipGUI_Impl* cgi){
 
     const float X = 20.0f;
     const float Y = 20.0f;
+    const float W = cb->s7.width + 10.0f;
+    const float H = cb->s7.height;
     const float paddingX = 10.0f;
     const float paddingY = 10.0f;
 
-    Rect_RenderXX(cb->w.Buffer,cb->w.Width,cb->w.Height,X,Y,cb->s7.width + 2 * paddingX,cb->s7.height + 2 * paddingY,BLACK);
-    Sprite_RenderAlpha(cb->w.Buffer,cb->w.Width,cb->w.Height,cb->s7.digits + n0,X + paddingX,Y + paddingY);
+    Rect_RenderXX(cb->w.Buffer,cb->w.Width,cb->w.Height,X,Y,3 * W + 2 * paddingX,H + 2 * paddingY,BLACK);
+    Sprite_RenderAlpha(cb->w.Buffer,cb->w.Width,cb->w.Height,cb->s7.digits + n2,X + paddingX,Y + paddingY);
+    Sprite_RenderAlpha(cb->w.Buffer,cb->w.Width,cb->w.Height,cb->s7.digits + n1,X + W + paddingX,Y + paddingY);
+    Sprite_RenderAlpha(cb->w.Buffer,cb->w.Width,cb->w.Height,cb->s7.digits + n0,X + 2 * W + paddingX,Y + paddingY);
 }
 void ChipBench_Seg7_Free(ChipBench* cb,ChipGUI_Impl* cgi){
     
@@ -46,7 +52,7 @@ void Ex_Packer(void* Extern_Functions,Vector* funcs,ChipBench* cb){ // Vector<CS
         cb,
         ChipGUI_Def_New(
             "SEG7",0U,
-            sizeof(Chip_Signal),
+            sizeof(Chip_Impl*),
             (void(*)(void*,ChipGUI_Impl*))ChipBench_Seg7_Render,
             (void(*)(void*,ChipGUI_Impl*))ChipBench_Seg7_Free,
             (void(*)(void*,ChipGUI_Impl*,ChipPipe_Type))ChipBench_Seg7_Pipe
