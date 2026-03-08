@@ -1,7 +1,7 @@
 #include "/home/codeleaded/System/Static/Library/ChipBench.h"
 
 int main(){
-    ChipBench cb = ChipBench_New();
+    ChipBench cb = ChipBench_New("./assets/digits");
     ChipBench_Load(&cb,"./bin/std");
     ChipBench_Load(&cb,"./bin/seg7");
     ChipBench_Print(&cb);
