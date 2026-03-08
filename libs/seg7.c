@@ -1,7 +1,9 @@
 #include "/home/codeleaded/System/Static/Library/ChipBench.h"
 
 void ChipBench_Seg7_Std(ChipBench* cb,Chip_Def* cd,Chip_Signal* input,Chip_Signal* output){
-    // Set
+    //ChipGUI_Impl* cgi = NULL;
+    //Chip_Signal* cs = (Chip_Signal*)cgi->data;
+    //(*cs)++;
 }
 
 void ChipBench_Seg7_Render(ChipBench* cb,ChipGUI_Impl* cgi){

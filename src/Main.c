@@ -10,7 +10,7 @@ int main(){
     ChipBench_Start(&cb);
     
     while(cb.w.Running){
-        if(cb.w.Strokes[ALX_KEY_W].PRESSED){
+        if(cb.w.Strokes[ALX_MOUSE_L].PRESSED){
             Chip_Signal ins[] = { cb.w.MouseX };
             Chip_Signal outs[] = { 0x0ULL };
             
