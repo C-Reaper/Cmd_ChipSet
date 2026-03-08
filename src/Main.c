@@ -9,13 +9,16 @@ int main(){
 
     Chip_Def cd = Chip_Def_New(
         "MAIN",
-        Chip_SignalSize_Map_Make((Chip_SignalSize[]){ CHIP_SIGNALSIZE_64,CHIP_SIGNALSIZE_NONE }),
+        Chip_SignalSize_Map_Make((Chip_SignalSize[]){ CHIP_SIGNALSIZE_64,CHIP_SIGNALSIZE_64,CHIP_SIGNALSIZE_NONE }),
         Chip_SignalSize_Map_Make((Chip_SignalSize[]){ CHIP_SIGNALSIZE_NONE })
     );
     Vector_Push(&cd.chips,(Chip_Impl[]){ ChipSet_New_Impl(&cb.cs,"SEG7") });
-    Vector_Push(&cd.wires,(Chip_Wire[]){{ .src = 0U, .dst = 1U  }});
+    Vector_Push(&cd.chips,(Chip_Impl[]){ ChipSet_New_Impl(&cb.cs,"SEG7") });
+    Vector_Push(&cd.wires,(Chip_Wire[]){{ .src = 0U, .dst = 2U  }});
+    Vector_Push(&cd.wires,(Chip_Wire[]){{ .src = 1U, .dst = 3U  }});
     ChipSet_AddChip(&cb.cs,cd);
-    ChipBench_AddGUI(&cb,"SEG7",0U,0U,(Chip_Impl*[]){ (Chip_Impl*)Vector_Get(&cd.chips,0) });
+    ChipBench_AddGUI(&cb,"SEG7",10U,0U,  (Chip_Impl*[]){ (Chip_Impl*)Vector_Get(&cd.chips,0) });
+    ChipBench_AddGUI(&cb,"SEG7",10U,250U,(Chip_Impl*[]){ (Chip_Impl*)Vector_Get(&cd.chips,1) });
 
 
     ChipBench_Print(&cb);
@@ -23,7 +26,7 @@ int main(){
     
     while(cb.w.Running){
         if(cb.w.Strokes[ALX_MOUSE_L].PRESSED){
-            Chip_Signal ins[] = { cb.w.MouseX };
+            Chip_Signal ins[] = { cb.w.MouseX,cb.w.MouseY };
             Chip_Signal outs[] = { 0x0ULL };
             
             ChipSet_Exe(

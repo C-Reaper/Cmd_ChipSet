@@ -19,8 +19,8 @@ void ChipBench_Seg7_Render(ChipBench* cb,ChipGUI_Impl* cgi){
     //Sprite_RenderAlpha(cb->w.Buffer,cb->w.Width,cb->w.Height,s7.digits + n1,s7.digits->w + 20.0f,0.0f);
     //Sprite_RenderAlpha(cb->w.Buffer,cb->w.Width,cb->w.Height,s7.digits + n0,2 * (s7.digits->w + 20.0f),0.0f);
 
-    const float X = 20.0f;
-    const float Y = 20.0f;
+    const float X = cgi->x;
+    const float Y = cgi->y;
     const float W = cb->s7.width + 10.0f;
     const float H = cb->s7.height;
     const float paddingX = 10.0f;
