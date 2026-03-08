@@ -4,6 +4,8 @@ int main(){
     ChipBench cb = ChipBench_New("./assets/digits");
     ChipBench_Load(&cb,"./bin/std");
     ChipBench_Load(&cb,"./bin/seg7");
+    ChipBench_AddGUI(&cb,"SEG7",0U,0U,(Chip_Signal[]){ 0U });
+
     ChipBench_Print(&cb);
     ChipBench_Start(&cb);
     
