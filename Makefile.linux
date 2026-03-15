@@ -10,7 +10,7 @@ BUILD_DIR = build
 CODE_DIR = code
 
 LIB_DIR = libs
-BIN_DIR = bin
+BIN_DIR = bench
 
 LIB_FILES = $(wildcard $(LIB_DIR)/*.c)
 SO_FILES = $(patsubst $(LIB_DIR)/%.c,$(BIN_DIR)/%.so,$(LIB_FILES))

@@ -2,9 +2,8 @@
 
 int main(){
     ChipBench cb = ChipBench_New("./assets/digits");
-
-    ChipBench_Load(&cb,"./bin/std");
-    ChipBench_Load(&cb,"./bin/seg7");
+    ChipBench_Load(&cb,"./bench/std");
+    ChipBench_Load(&cb,"./bench/seg7");
 
 
     Chip_Def cd = Chip_Def_New(
@@ -17,6 +16,7 @@ int main(){
     Vector_Push(&cd.wires,(Chip_Wire[]){{ .src = 0U, .dst = 2U  }});
     Vector_Push(&cd.wires,(Chip_Wire[]){{ .src = 1U, .dst = 3U  }});
     ChipSet_AddChip(&cb.cs,cd);
+    
     ChipBench_AddGUI(&cb,"SEG7",10U,0U,  (Chip_Impl*[]){ (Chip_Impl*)Vector_Get(&cd.chips,0) });
     ChipBench_AddGUI(&cb,"SEG7",10U,250U,(Chip_Impl*[]){ (Chip_Impl*)Vector_Get(&cd.chips,1) });
 
